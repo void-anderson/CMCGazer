@@ -1,7 +1,7 @@
 use reqwest::header::ACCEPT;
-use std::path::Path;
+use serde::Deserialize;
 use std::collections::HashMap;
-use serde::{Deserialize};
+use std::path::Path;
 
 // Data Structures
 #[derive(Deserialize, Debug)]
@@ -24,13 +24,13 @@ struct CurrencyClass {
     percent_change_60d: f64,
     percent_change_7d: f64,
     percent_change_90d: f64,
-    price: f64, 
+    price: f64,
     volume_24h: f64,
 }
 
 #[derive(Deserialize, Debug)]
 struct Quote {
-    USD: CurrencyClass
+    USD: CurrencyClass,
 }
 
 #[derive(Deserialize, Debug)]
@@ -61,7 +61,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut settings = config::Config::default();
     let home = std::env::var("HOME").unwrap();
     let path_str = format!("{}/.gazer.toml", home);
-    settings.merge(config::File::from(Path::new(&path_str)))
+    settings
+        .merge(config::File::from(Path::new(&path_str)))
         .expect("Configuration File Not Found");
     let settings_map = settings.try_into::<HashMap<String, String>>().unwrap();
 
@@ -75,9 +76,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .header(ACCEPT, "application/json")
         .header("X-CMC_PRO_API_KEY", &settings_map["api_key"])
         .query(&[
-           ("start", &settings_map["start"]),
-           ("limit", &settings_map["limit"]),
-           ("convert", &settings_map["base_currency"])
+            ("start", &settings_map["start"]),
+            ("limit", &settings_map["limit"]),
+            ("convert", &settings_map["base_currency"]),
         ])
         .send()
         .await?
